@@ -40,8 +40,19 @@
     while (<= y-b y-a)
     finally (return a)))
 
-(time (smallest-state *observations*))
 
+;;SBCL via Portacle (Dell XPS 15 9550, 16 GB RAM)
+;; CL-USER> (time  (progn  (smallest-state *observations*) nil))
+;; Evaluation took:
+;; 0.238 seconds of real time
+;; 0.234375 seconds of total run time (0.234375 user, 0.000000 system)
+;; [ Run times consist of 0.045 seconds GC time, and 0.190 seconds non-GC time. ]
+;; 98.32% CPU
+;; 635,571,929 processor cycles
+;; 364,754,592 bytes consed
+
+
+;Original submission (on "crappy laptop", unknown lisp, unknown hardware)
 ;; To compute this:
 ;; Evaluation took:
 ;;   0.378 seconds of real time
