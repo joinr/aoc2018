@@ -64,6 +64,7 @@
   [xs]
   (iterate evolve-state xs))
 
+
 ;;new, we consolidate the map and predicate
 ;;functions into a useful predicate.
 (defn before-growth [^clojure.lang.ISeq ab]
@@ -81,6 +82,21 @@
   (->> (state-seq xs)       
        (partition 2 1)
        (some before-growth)))
+
+(defn shortest-state-reduce
+  "This is a reduce based variant that's even
+   simpler than loop/recur.  It will terminate
+   early as well."
+  [xs]
+  (reduce (fn [[a height-a]  _]
+            (let [b        (evolve-state a)
+                  height-b (y-height b)]
+              (if (> height-b height-a)
+                (reduced a) ;;a was smaller.
+                [b height-b])))
+          [xs (y-height xs)]
+          (range)))
+             
 
 (defn shortest-state-loop  
   "We eschew the intermediate seqs and conform closer to the CL
@@ -114,6 +130,11 @@
 ;;"Elapsed time: 287.974153 msecs"
 
 
+;;The reduce-based version is about
+;;as good as loop (typical)
+(time 
+ (shortest-state-red ten/observations))
+;;"Elapsed time: 293.412182 msecs"
 
 
 ;;EXPERIMENTS / MICROBENCHMARKS:
