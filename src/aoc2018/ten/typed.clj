@@ -134,7 +134,7 @@
                 [b height-b])))
           [xs (y-height xs)]
           (range)))
-             
+
 (defn shortest-state-loop  
   "We eschew the intermediate seqs and conform closer to the CL
        loop-based implementation."
@@ -152,22 +152,25 @@
 (defn cells->observations [xs]
   (vec (for [{:keys [x y vx vy]} xs]
          [[x y] [vx vy]])))
-  
-;;seq version is faster now than hinted
-;;vector versions.
-(time (do (shortest-state xs) nil))
-;;"Elapsed time: 153.765653 msecs"
-
-;;reduce version is on par with loop still.
-(time (do (shortest-state-reduce xs) nil))
-;;"Elapsed time: 110.033865 msecs"
 
 
-;;loop version with records only 5x slower than mutable
-;;array version.
-(time (do (shortest-state-loop xs) nil))
-;;"Elapsed time: 105.229515 msecs"
+(comment
+  (let [xs (observations->cells ten/observations)]
+    ;;seq version is faster now than hinted
+    ;;vector versions.
+    (time (do (shortest-state xs) nil))
+    ;;"Elapsed time: 153.765653 msecs"
 
+    ;;reduce version is on par with loop still.
+    (time (do (shortest-state-reduce xs) nil))
+    ;;"Elapsed time: 110.033865 msecs"
+
+
+    ;;loop version with records only 5x slower than mutable
+    ;;array version.
+    (time (do (shortest-state-loop xs) nil))
+    ;;"Elapsed time: 105.229515 msecs"
+))
 
 
 ;;Experiments and observations:
