@@ -48,7 +48,6 @@
                (recur (unchecked-add idx 4))))))))
   ([xs] (evolve-state! xs xs)))
 
-
 (defn shortest-state-loop  
   [^longs xs]
   (let [^longs xs (aclone ^longs xs)
