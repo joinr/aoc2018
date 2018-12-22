@@ -133,7 +133,7 @@
 ;;The reduce-based version is about
 ;;as good as loop (typical)
 (time 
- (shortest-state-red ten/observations))
+ (shortest-state-reduce ten/observations))
 ;;"Elapsed time: 293.412182 msecs"
 
 
