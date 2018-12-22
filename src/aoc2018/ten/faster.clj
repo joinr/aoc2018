@@ -48,7 +48,7 @@
 ;;neglibile improvement
 (defn y-height [^clojure.lang.Indexed state]
   (let [^clojure.lang.Indexed bnds (bounds state)
-        ymin (.nth bnds 1)
+        ymin (.nth bnds 2)
         ymax (.nth bnds 3)]
   (unchecked-subtract ^long ymax ^long ymin)))
 

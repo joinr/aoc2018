@@ -31,7 +31,7 @@
 
 ;;changed to a flat vector instead of nested [] [] 
 (defn y-height [state]
-  (let [[xmin ymin xmax ymax] (bounds state)]
+  (let [[xmin xmax ymin ymax] (bounds state)]
     (- ymax ymin)))
 
 (defn evolve-state!
@@ -73,7 +73,7 @@
   (time
    (shortest-state-loop
     (observation-array aoc2018.ten/observations)))
-;;"Elapsed time: 30.728715 msecs"
+;;"Elapsed time: 19.728715 msecs"
   )
 
 

@@ -31,7 +31,7 @@
 
 ;;changed to a flat vector instead of nested [] [] 
 (defn y-height [state]
-  (let [[xmin ymin xmax ymax] (bounds state)]
+  (let [[xmin xmax ymin ymax] (bounds state)]
     (- ymax ymin)))
 
 (defn evolve-point [[p v]]
@@ -84,8 +84,8 @@
 
 (time
  (shortest-state observations))
-;;"Elapsed time: 710.924808 msecs"
+;;"Elapsed time: 663.924808 msecs"
 
 (time
  (shortest-state-loop observations))
-;;"Elapsed time: 435.279752 msecs"
+;;"Elapsed time: 429.183943 msecs"
