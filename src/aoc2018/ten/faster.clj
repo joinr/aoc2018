@@ -16,6 +16,8 @@
  (let [x 1 y 2] (dotimes [i 1000000] (pair x y))))
 
 
+;;for the record, if we use structural types
+;;with direct field access, we get dis...
 (defrecord position [x y])
 
 ;;9.6 ms, better!
@@ -124,3 +126,20 @@
         (let [nxt (evolve-state b)]
           (recur b height-b nxt (y-height nxt)))
         a))))
+
+
+
+;;This is now as fast as the
+;;looped, non-hinted version from before.
+(time
+ (shortest-state observations))
+;;"Elapsed time: 451.000849 msecs"
+
+
+;;This is now in the ballpark of CL
+;;on my hardware (CL is at 238 to 280)
+
+;;Clojure comes in around 283 to 296
+(time
+ (shortest-state-loop observations))
+;;"Elapsed time: 287.974153 msecs"
