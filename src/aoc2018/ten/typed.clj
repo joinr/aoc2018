@@ -64,6 +64,7 @@
 (defrecord extrema [^long xmin ^long xmax ^long ymin ^long ymax])
 
 ;;40 ms vs 135ms @ 10k iterations
+;;Note: we can get around 
 (defn bounds [state]
   (reduce (fn [^extrema acc ^longcell pv]
             (let [x     (.-x pv)
