@@ -20,15 +20,15 @@
 
 ;; [1518-11-01 00:00] Guard #10 begins shift
 ;; [1518-11-01 00:05] falls asleep
-;; [1518-11-01 00:25] wakes up
+;; [1518-11-01 00:25] wakes up  ;;20
 ;; [1518-11-01 00:30] falls asleep
-;; [1518-11-01 00:55] wakes up
+;; [1518-11-01 00:55] wakes up ;;25
 ;; [1518-11-01 23:58] Guard #99 begins shift
 ;; [1518-11-02 00:40] falls asleep
-;; [1518-11-02 00:50] wakes up
+;; [1518-11-02 00:50] wakes up  
 ;; [1518-11-03 00:05] Guard #10 begins shift
 ;; [1518-11-03 00:24] falls asleep
-;; [1518-11-03 00:29] wakes up
+;; [1518-11-03 00:29] wakes up ;;5
 ;; [1518-11-04 00:02] Guard #99 begins shift
 ;; [1518-11-04 00:36] falls asleep
 ;; [1518-11-04 00:46] wakes up
@@ -100,18 +100,24 @@
      :id id
      :activity activity}))
 
-(def logs
-  (->> (slurp "day-4-input.txt")
-       clojure.string/split-lines
-       (map parse-log)
-       (sort-by (juxt :month :day (fn [r] (- (:hour r))) :min ))))
+;;got the chonological ordering wrong...
+;;00 comes before 23:00, duh...
+(defn read-logs
+  ([txt]
+   (->> txt
+        clojure.string/split-lines
+        (map parse-log)
+        (sort-by (juxt :month :day :hour #_(fn [r] (- (:hour r))) :min ))))
+  ([] (read-logs (slurp "day-4-input.txt"))))
+(def logs (read-logs))
 
 ;;we need to compute stats now...
 ;;the primary goal is to find the guard
 ;;with the most sleep, and the most
 ;;slept minute.
 ;;We have a vector format...
-(defn guard-samples [xs]
+
+(defn sleep-samples [xs]
   (let [id       (atom nil)]
     (->> xs
          (map (fn [r]
@@ -119,40 +125,66 @@
                   (do (reset! id (:id r))
                       r)
                   (assoc r :id @id))))
-         (reduce (fn [[prior xs] {:keys [hour min] :as r}]
-                   (if (= (:activity r) :begins)
-                     [(:id r) (if prior
-                                (conj xs (assoc r :id prior
-                                                :hour (if (zero? min) (dec hour) hour)
-                                                :min (if (zero? min) 59 (dec min))
-                                                :activity :ends) r)
-                                (conj xs r))]
-                     [prior (conj xs r)]))
-                 [nil []])
-         second)))
+         (filter #(#{:asleep :wakes} (:activity %)))
+         (partition 2)
+         (map (fn [[l r]]
+                (assoc l :duration (- (:min r) (:min l))))
+              ))))
 
-(defn lite-samples [xs]
-  (let [id       (atom nil)]
-    (->> xs
-         (map (fn [r]
-                (if (:id r)
-                  (do (reset! id (:id r))
-                      r)
-                  (assoc r :id @id)))))))
-
-(defn sleep-intervals [samples]
-  (for [[id xs] (->> samples
-                     (filter (fn [{:keys [activity]}]
-                               (#{:asleep :wakes :ends}  activity)))
-                     (group-by :id))]
-    [id (->> xs 
-             (partition 2 1)
-             (map (fn [[l r]]              
-                    (assoc l :duration
-                           (if (= (:hour l) (:hour r))
-                             (- (:min r) (:min l))
-                             (+ (- 59 (:min l))
-                                (:min r))))))
-             (filter (fn [r] (= (:activity r) :asleep)))
-             (map (fn [r] {:start (:min r) :duration (:duration r)})))]))
+(defn guard-stats [ls]
+  (->> (for [[id xs] (->> ls
+                          sleep-samples
+                          (group-by :id))]
+         (let [freqs (frequencies
+                      (apply concat
+                             (for [{:keys [min duration]} xs]
+                               (range min (+ duration min)))))
+               
+               [m n total]  (reduce-kv (fn [[mbest nbest total :as acc] m n]
+                                         (if (> n nbest)
+                                           [m n (+ total n)]
+                                           [mbest nbest (+ total n)]))
+                                       [0 0 0] freqs)]
+           [id (with-meta {:minute m
+                           :count n
+                           :total total}
+                 {:freqs freqs})]))
+       (sort-by (fn [[_ {:keys [total]}]] (- total)))))
   
+
+;; --- Part Two ---
+
+;; Strategy 2: Of all guards, which guard is most frequently asleep on
+;; the same minute?
+
+;; In the example above, Guard #99 spent minute 45 asleep more than
+;; any other guard or minute - three times in total. (In all other
+;; cases, any guard spent any minute asleep at most twice.)
+
+;; What is the ID of the guard you chose multiplied by the minute you
+;; chose? (In the above example, the answer would be 99 * 45 = 4455.)
+
+(defn minute-stats [gs]
+  (->> gs
+       (sort-by (fn [[_ {:keys [count]}]]
+                  (- count)))
+       first))
+
+(def sample-data
+"[1518-11-01 00:00] Guard #10 begins shift
+ [1518-11-01 00:05] falls asleep
+ [1518-11-01 00:25] wakes up
+ [1518-11-01 00:30] falls asleep
+ [1518-11-01 00:55] wakes up
+ [1518-11-01 23:58] Guard #99 begins shift
+ [1518-11-02 00:40] falls asleep
+ [1518-11-02 00:50] wakes up
+ [1518-11-03 00:05] Guard #10 begins shift
+ [1518-11-03 00:24] falls asleep
+ [1518-11-03 00:29] wakes up
+ [1518-11-04 00:02] Guard #99 begins shift
+ [1518-11-04 00:36] falls asleep
+ [1518-11-04 00:46] wakes up
+ [1518-11-05 00:03] Guard #99 begins shift
+ [1518-11-05 00:45] falls asleep
+ [1518-11-05 00:55] wakes up")
