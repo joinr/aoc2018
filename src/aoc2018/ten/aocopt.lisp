@@ -89,6 +89,9 @@
      :vx vx
      :vy vy )))
 
+(defun evolve-state (state)
+  (mapcar #'evolve-point state))
+
 (defun smallest-state (start)
   (loop
     as a = start then b
