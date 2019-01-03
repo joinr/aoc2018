@@ -157,6 +157,7 @@
   ([sites site xy]
    (-> site sites (manhattan xy))))
 
+;;this is a lame way to establish known infinite areas.
 (defn boundary-points [xmin xmax ymin ymax]
   (concat 
    (for [x [xmin (inc xmax)]
